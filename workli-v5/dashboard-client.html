@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הדשבורד שלי — Workli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .dash-wrap { max-width:800px; margin:0 auto; padding:40px 5% 80px; }
+    .welcome { margin-bottom:36px; }
+    .welcome h1 { font-size:1.8rem; font-weight:900; letter-spacing:-1px; margin-bottom:6px; }
+    .welcome p { color:var(--muted); }
+    .nav-user { display:flex; align-items:center; gap:12px; }
+    .nav-avatar { width:34px; height:34px; border-radius:50%; background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; }
+    .logout-link { font-size:0.85rem; color:var(--muted); cursor:pointer; }
+    .logout-link:hover { color:var(--error); }
+
+    .quick-actions { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px; }
+    @media(max-width:600px) { .quick-actions { grid-template-columns:1fr; } }
+    .quick-card { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:24px; text-decoration:none; color:var(--black); transition:all 0.2s; display:block; }
+    .quick-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 24px rgba(79,110,247,0.1); }
+    .quick-icon { font-size:1.8rem; margin-bottom:12px; }
+    .quick-card h3 { font-size:1rem; font-weight:700; margin-bottom:4px; }
+    .quick-card p { font-size:0.85rem; color:var(--muted); }
+
+    .profile-section { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:28px; }
+    .profile-section h2 { font-size:1.1rem; font-weight:800; margin-bottom:20px; }
+    .profile-form { display:flex; flex-direction:column; gap:14px; }
+    .profile-form input { width:100%; padding:12px 16px; border:1.5px solid var(--border); border-radius:10px; font-family:'Heebo',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.2s; background:var(--white); }
+    .profile-form input:focus { border-color:var(--accent); }
+    .save-btn { background:var(--accent); color:#fff; border:none; border-radius:10px; padding:12px 28px; font-size:0.95rem; font-weight:700; cursor:pointer; font-family:'Heebo',sans-serif; transition:background 0.2s; align-self:flex-start; }
+    .save-btn:hover { background:#3a57e0; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Work<span>li</span></a>
+  <div class="nav-user">
+    <div class="nav-avatar" id="nav-initial">?</div>
+    <span class="logout-link" onclick="logout()">יציאה</span>
+  </div>
+</nav>
+
+<div class="dash-wrap">
+  <div class="welcome">
+    <h1>שלום, <span id="user-name">...</span> 👋</h1>
+    <p>מה אתה מחפש היום?</p>
+  </div>
+
+  <div class="quick-actions">
+    <a href="browse.html" class="quick-card">
+      <div class="quick-icon">🔍</div>
+      <h3>חפש פרילנסרים</h3>
+      <p>מצא כישרון לפי תחום ומחיר</p>
+    </a>
+    <a href="browse.html?cat=עיצוב גרפי" class="quick-card">
+      <div class="quick-icon">🎨</div>
+      <h3>עיצוב גרפי</h3>
+      <p>לוגו, פוסטים, מיתוג</p>
+    </a>
+    <a href="browse.html?cat=פיתוח אתרים" class="quick-card">
+      <div class="quick-icon">💻</div>
+      <h3>פיתוח אתרים</h3>
+      <p>אתרי תדמית, חנויות, אפליקציות</p>
+    </a>
+    <a href="browse.html?cat=סושיאל מדיה" class="quick-card">
+      <div class="quick-icon">📱</div>
+      <h3>סושיאל מדיה</h3>
+      <p>ניהול פרופילים, תוכן</p>
+    </a>
+  </div>
+
+  <div class="profile-section">
+    <h2>הפרטים שלך</h2>
+    <div class="profile-form">
+      <input type="text" id="p-name" placeholder="שם מלא או שם העסק" />
+      <input type="tel" id="p-phone" placeholder="טלפון ליצירת קשר" />
+      <button class="save-btn" onclick="saveProfile()">שמור</button>
+      <div id="save-msg" style="font-size:0.85rem; color:var(--success); display:none;">✓ נשמר!</div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+  let currentUser = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
+    currentUser = session.user;
+
+    const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    document.getElementById('user-name').textContent = name;
+    document.getElementById('nav-initial').textContent = name.charAt(0).toUpperCase();
+
+    const { data: profile } = await supabaseClient
+      .from('profiles').select('*').eq('id', currentUser.id).single();
+    if (profile) {
+      document.getElementById('p-name').value = profile.full_name || '';
+      document.getElementById('p-phone').value = profile.phone || '';
+    }
+  }
+
+  async function saveProfile() {
+    await supabaseClient.from('profiles').upsert({
+      id: currentUser.id,
+      full_name: document.getElementById('p-name').value.trim(),
+      phone: document.getElementById('p-phone').value.trim(),
+      role: 'client'
+    });
+    document.getElementById('save-msg').style.display = 'block';
+    setTimeout(() => document.getElementById('save-msg').style.display = 'none', 3000);
+  }
+
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

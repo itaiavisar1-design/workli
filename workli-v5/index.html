@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workli — מצא פרילנסרים ישראלים תוך דקות</title>
+  <meta name="description" content="הפלטפורמה הישראלית לפרילנסרים צעירים. מצא לקוחות, פרסם פרופיל, וקבל עבודה תוך דקות — ישירות בווטסאפ." />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+      margin-top: 52px; padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem; font-weight: 700; letter-spacing: -1px; color: var(--black);
+    }
+    .stat-num span { color: var(--accent); }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { padding: 96px 5%; background: var(--black); color: var(--white); }
+    .how-section .section-label { color: var(--accent2); font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    .how-section .section-title { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 48px; color: var(--white); }
+    .how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+    @media (max-width: 700px) { .how-grid { grid-template-columns: 1fr; gap: 40px; } }
+    .how-col h3 { font-size: 1rem; font-weight: 700; color: var(--accent2); margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+    .how-steps { display: flex; flex-direction: column; gap: 0; }
+    .how-step { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .how-step:last-child { border-bottom: none; }
+    .how-num { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.25); min-width: 28px; padding-top: 3px; }
+    .how-step-content h4 { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+    .how-step-content p { font-size: 0.88rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+    /* ── CATEGORIES ── */
+    .cats-section { padding: 96px 5%; }
+    .section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 48px; }
+    .cats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .cat-card {
+      background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 22px 16px; text-align: center; cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+      display: block;
+    }
+    .cat-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(79,110,247,0.1); }
+    .cat-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .cat-name { font-size: 0.88rem; font-weight: 700; color: var(--black); }
+
+    /* ── TRUST ── */
+    .trust-section { padding: 96px 5%; background: #F0F2FF; }
+    .trust-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .trust-card { background: var(--card-bg); border-radius: 16px; padding: 28px 24px; border: 1.5px solid var(--border); }
+    .trust-stars { color: #F5A623; font-size: 0.9rem; margin-bottom: 14px; }
+    .trust-text { font-size: 0.95rem; line-height: 1.7; color: var(--black); margin-bottom: 20px; }
+    .trust-author { display: flex; align-items: center; gap: 12px; }
+    .trust-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    .trust-name { font-weight: 700; font-size: 0.9rem; }
+    .trust-role { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── CTA BOTTOM ── */
+    .cta-bottom { padding: 96px 5%; background: var(--accent); text-align: center; color: #fff; }
+    .cta-bottom h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }
+    .cta-bottom p { color: rgba(255,255,255,0.75); max-width: 480px; margin: 0 auto 40px; font-size: 1.05rem; }
+    .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: #fff; color: var(--accent); border: none; border-radius: 10px; padding: 15px 32px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: 'Heebo', sans-serif; text-decoration: none; display: inline-block; transition: transform 0.15s, box-shadow 0.2s; }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .btn-outline-white { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; padding: 15px 32px; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-block; transition: border-color 0.2s, transform 0.15s; font-family: 'Heebo', sans-serif; }
+    .btn-outline-white:hover { border-color: #fff; transform: translateY(-2px); }
+
+    /* ── PRICE FILTER TEASER ── */
+    .filter-teaser { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
+    .filter-pill { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 100px; padding: 7px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s; text-decoration: none; }
+    .filter-pill:hover { background: rgba(255,255,255,0.25); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Work<span>li</span></a>
+  <div class="nav-links">
+    <a href="browse.html" class="nav-link">חפש פרילנסרים</a>
+    <a href="auth.html" class="nav-link" id="nav-auth-link">כניסה</a>
+    <a href="auth.html" class="btn-primary" style="padding:9px 20px; font-size:0.88rem;">הרשמה</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🇮🇱 הפלטפורמה הישראלית לפרילנסרים</div>
+  <h1>מצא פרילנסרים ישראלים<br/><em>תוך דקות</em> — ישירות בווטסאפ</h1>
+  <p class="hero-sub">
+    בלי תיווך. בלי עמלות מוגזמות. Workli מחברת בין צעירים מוכשרים לעסקים שצריכים אותם — בשקל, בעברית, עכשיו.
+  </p>
+  <div class="hero-actions">
+    <a href="signup.html" class="btn-primary">אני רוצה להרוויח כסף</a>
+    <a href="browse.html" class="btn-secondary">אני מחפש כישרון</a>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num">500<span>+</span></div>
+      <div class="stat-label">פרילנסרים רשומים</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">120<span>+</span></div>
+      <div class="stat-label">פרויקטים שפורסמו</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">95<span>%</span></div>
+      <div class="stat-label">מענה תוך 24 שעות</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">12<span>+</span></div>
+      <div class="stat-label">קטגוריות שירות</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="section-label">איך זה עובד</div>
+  <h2 class="section-title">פשוט. מהיר. ישראלי.</h2>
+  <div class="how-grid">
+    <div class="how-col">
+      <h3>👤 אני פרילנסר</h3>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num">01</div>
+          <div class="how-step-content">
+            <h4>יוצר פרופיל תוך 2 דקות</h4>
+            <p>שם, תחום, מחיר ותיאור קצר — ללא קורות חיים ארוכים.</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">02</div>
+          <div class="how-step-content">
+            <h4>מקבל פניות ישירות</h4>
+            <p>לקוחות מוצאים אותך ופונים בווטסאפ — אתה בוחר עם מי לעבוד.</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">03</div>
+          <div class="how-step-content">
+            <h4>סוגר עסקה ומרוויח</h4>
+            <p>מתדברים, מסכימים על מחיר, ומתחילים לעבוד. הכסף שלך.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="how-col">
+      <h3>🏢 אני מחפש כישרון</h3>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num">01</div>
+          <div class="how-step-content">
+            <h4>מחפש לפי תחום ומחיר</h4>
+            <p>סינון מהיר לפי קטגוריה ותקציב — מוצא את המתאים תוך שניות.</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">02</div>
+          <div class="how-step-content">
+            <h4>פונה ישירות בווטסאפ</h4>
+            <p>לחיצה אחת פותחת שיחה עם הפרילנסר — בלי טפסים ובלי המתנה.</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">03</div>
+          <div class="how-step-content">
+            <h4>מתחיל לעבוד מיד</h4>
+            <p>מסכמים פרטים, מתחילים — בלי בירוקרטיה ובלי עמלות נסתרות.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="cats-section">
+  <div class="section-label">קטגוריות</div>
+  <h2 class="section-title">כל מה שעסק קטן צריך</h2>
+  <div class="cats-grid">
+    <a href="browse.html?cat=עיצוב גרפי" class="cat-card"><div class="cat-icon">🎨</div><div class="cat-name">עיצוב גרפי</div></a>
+    <a href="browse.html?cat=פיתוח אתרים" class="cat-card"><div class="cat-icon">💻</div><div class="cat-name">פיתוח אתרים</div></a>
+    <a href="browse.html?cat=סושיאל מדיה" class="cat-card"><div class="cat-icon">📱</div><div class="cat-name">סושיאל מדיה</div></a>
+    <a href="browse.html?cat=עריכת וידאו" class="cat-card"><div class="cat-icon">🎬</div><div class="cat-name">עריכת וידאו</div></a>
+    <a href="browse.html?cat=כתיבה ותוכן" class="cat-card"><div class="cat-icon">✍️</div><div class="cat-name">כתיבה ותוכן</div></a>
+    <a href="browse.html?cat=צילום" class="cat-card"><div class="cat-icon">📸</div><div class="cat-name">צילום</div></a>
+    <a href="browse.html?cat=שיווק דיגיטלי" class="cat-card"><div class="cat-icon">📊</div><div class="cat-name">שיווק דיגיטלי</div></a>
+    <a href="browse.html?cat=AI Automation" class="cat-card"><div class="cat-icon">🤖</div><div class="cat-name">AI Automation</div></a>
+    <a href="browse.html?cat=מוזיקה ופודקאסט" class="cat-card"><div class="cat-icon">🎵</div><div class="cat-name">מוזיקה</div></a>
+    <a href="browse.html?cat=שיעורים פרטיים" class="cat-card"><div class="cat-icon">📚</div><div class="cat-name">שיעורים פרטיים</div></a>
+  </div>
+</section>
+
+<!-- TRUST / TESTIMONIALS -->
+<section class="trust-section">
+  <div class="section-label">מה אומרים</div>
+  <h2 class="section-title">הם כבר מצאו מה שחיפשו</h2>
+  <div class="trust-grid">
+    <div class="trust-card">
+      <div class="trust-stars">★★★★★</div>
+      <p class="trust-text">סוף סוף פלטפורמה שמבינה שאני לא רוצה להתמודד עם דולרים ו-PayPal. שקל ישיר לחשבון — זה כל מה שרציתי.</p>
+      <div class="trust-author">
+        <div class="trust-avatar">נ</div>
+        <div>
+          <div class="trust-name">נועה כ.</div>
+          <div class="trust-role">מעצבת גרפית, תל אביב</div>
+        </div>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-stars">★★★★★</div>
+      <p class="trust-text">כבעל עסק קטן, ביזבזתי שעות על פייבר ולא מצאתי אנשים שמבינים את השוק הישראלי. Workli זה בדיוק מה שחסר.</p>
+      <div class="trust-author">
+        <div class="trust-avatar">א</div>
+        <div>
+          <div class="trust-name">אלון מ.</div>
+          <div class="trust-role">בעל עסק, ראשון לציון</div>
+        </div>
+      </div>
+    </div>
+    <div class="trust-card">
+      <div class="trust-stars">★★★★★</div>
+      <p class="trust-text">תוך יומיים מפרסום הפרופיל שלי כבר קיבלתי 3 פניות. אחת מהן הפכה ללקוח קבוע. ממליץ לכל פרילנסר.</p>
+      <div class="trust-author">
+        <div class="trust-avatar">י</div>
+        <div>
+          <div class="trust-name">יונתן ש.</div>
+          <div class="trust-role">עורך וידאו, חיפה</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BOTTOM -->
+<section class="cta-bottom">
+  <h2>מוכן להתחיל?</h2>
+  <p>הצטרף לאלפי ישראלים שכבר מוצאים עבודה וכישרון דרך Workli</p>
+  <div class="cta-btns">
+    <a href="signup.html" class="btn-white">פרסם פרופיל חינם</a>
+    <a href="browse.html" class="btn-outline-white">חפש פרילנסרים</a>
+  </div>
+  <div class="filter-teaser">
+    <a href="browse.html?max=100" class="filter-pill">עד ₪100 לשעה</a>
+    <a href="browse.html?max=200" class="filter-pill">עד ₪200 לשעה</a>
+    <a href="browse.html?max=500" class="filter-pill">עד ₪500 לפרויקט</a>
+    <a href="browse.html" class="filter-pill">כל המחירים</a>
+  </div>
+</section>
+
+<footer>Workli · נבנה בישראל 🇮🇱 · <a href="signup.html" style="color:var(--muted); text-decoration:none;">פרסם פרופיל</a> · <a href="browse.html" style="color:var(--muted); text-decoration:none;">חפש פרילנסרים</a></footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  // Update nav based on auth state
+  supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      const authLink = document.getElementById('nav-auth-link');
+      const regBtn = document.querySelector('a[href="auth.html"].btn-primary');
+      if (authLink) { authLink.textContent = 'הדשבורד שלי'; authLink.href = 'dashboard-freelancer.html'; }
+      if (regBtn) regBtn.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

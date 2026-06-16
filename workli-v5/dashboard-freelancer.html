@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הדשבורד שלי — Workli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .dash-wrap { max-width:800px; margin:0 auto; padding:40px 5% 80px; }
+    .welcome { margin-bottom:36px; }
+    .welcome h1 { font-size:1.8rem; font-weight:900; letter-spacing:-1px; margin-bottom:6px; }
+    .welcome p { color:var(--muted); }
+    .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:36px; }
+    @media(max-width:600px) { .dash-grid { grid-template-columns:1fr; } }
+    .dash-card { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:24px; }
+    .dash-card h3 { font-size:0.78rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+    .dash-card .big-num { font-family:'Space Grotesk',sans-serif; font-size:2.2rem; font-weight:700; letter-spacing:-1px; color:var(--accent); }
+
+    .profile-section { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:28px; margin-bottom:20px; }
+    .profile-section h2 { font-size:1.1rem; font-weight:800; margin-bottom:20px; }
+    .profile-form { display:flex; flex-direction:column; gap:14px; }
+    .profile-form input, .profile-form textarea, .profile-form select {
+      width:100%; padding:12px 16px; border:1.5px solid var(--border); border-radius:10px;
+      font-family:'Heebo',sans-serif; font-size:0.95rem; outline:none;
+      transition:border-color 0.2s; background:var(--white);
+    }
+    .profile-form input:focus, .profile-form textarea:focus, .profile-form select:focus { border-color:var(--accent); }
+    .profile-form textarea { min-height:80px; resize:vertical; }
+    .save-btn {
+      background:var(--accent); color:#fff; border:none; border-radius:10px;
+      padding:12px 28px; font-size:0.95rem; font-weight:700; cursor:pointer;
+      font-family:'Heebo',sans-serif; transition:background 0.2s; align-self:flex-start;
+    }
+    .save-btn:hover { background:#3a57e0; }
+
+    .nav-user { display:flex; align-items:center; gap:12px; }
+    .nav-avatar { width:34px; height:34px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; }
+    .logout-link { font-size:0.85rem; color:var(--muted); cursor:pointer; text-decoration:none; }
+    .logout-link:hover { color:var(--error); }
+
+    .action-card { background:var(--accent); color:#fff; border-radius:16px; padding:24px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+    .action-card h3 { font-size:1rem; font-weight:700; margin-bottom:4px; }
+    .action-card p { font-size:0.85rem; opacity:0.8; }
+    .action-card a { background:#fff; color:var(--accent); border-radius:8px; padding:10px 20px; font-size:0.88rem; font-weight:700; text-decoration:none; white-space:nowrap; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Work<span>li</span></a>
+  <div class="nav-user">
+    <div class="nav-avatar" id="nav-initial">?</div>
+    <a class="logout-link" onclick="logout()">יציאה</a>
+  </div>
+</nav>
+
+<div class="dash-wrap">
+  <div class="welcome">
+    <h1>שלום, <span id="user-name">...</span> 👋</h1>
+    <p>ברוך הבא לדשבורד הפרילנסר שלך</p>
+  </div>
+
+  <div class="action-card" id="publish-cta" style="display:none;">
+    <div>
+      <h3>הפרופיל שלך עדיין לא פורסם</h3>
+      <p>מלא את הפרטים למטה ופרסם כדי שלקוחות יוכלו למצוא אותך</p>
+    </div>
+    <a href="signup.html">פרסם פרופיל</a>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <h3>צפיות בפרופיל</h3>
+      <div class="big-num">—</div>
+    </div>
+    <div class="dash-card">
+      <h3>פניות שקיבלת</h3>
+      <div class="big-num">—</div>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h2>הפרופיל האישי שלך</h2>
+    <div class="profile-form">
+      <input type="text" id="p-name" placeholder="שם מלא" />
+      <input type="tel" id="p-phone" placeholder="מספר טלפון / ווטסאפ" />
+      <textarea id="p-bio" placeholder="ספר על עצמך — מה אתה עושה, כמה ניסיון יש לך, ועם מי עבדת"></textarea>
+      <button class="save-btn" onclick="saveProfile()">שמור פרופיל</button>
+      <div id="save-msg" style="font-size:0.85rem; color:var(--success); display:none;">✓ נשמר בהצלחה!</div>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:12px;">
+    <a href="browse.html" style="color:var(--muted); font-size:0.85rem;">← חזור לעמוד החיפוש</a>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+  let currentUser = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
+    currentUser = session.user;
+
+    const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    document.getElementById('user-name').textContent = name;
+    document.getElementById('nav-initial').textContent = name.charAt(0).toUpperCase();
+
+    // Load profile
+    const { data: profile } = await supabaseClient
+      .from('profiles').select('*').eq('id', currentUser.id).single();
+
+    if (profile) {
+      document.getElementById('p-name').value = profile.full_name || '';
+      document.getElementById('p-phone').value = profile.phone || '';
+      document.getElementById('p-bio').value = profile.bio || '';
+    }
+
+    // Check if freelancer profile published
+    const { data: freelancerProfile } = await supabaseClient
+      .from('freelancers').select('id').eq('whatsapp', (profile?.phone||'').replace(/[^0-9]/g,'')).single();
+    if (!freelancerProfile) {
+      document.getElementById('publish-cta').style.display = 'flex';
+    }
+  }
+
+  async function saveProfile() {
+    const btn = document.querySelector('.save-btn');
+    btn.textContent = 'שומר...'; btn.disabled = true;
+
+    const { error } = await supabaseClient.from('profiles').upsert({
+      id: currentUser.id,
+      full_name: document.getElementById('p-name').value.trim(),
+      phone: document.getElementById('p-phone').value.trim(),
+      bio: document.getElementById('p-bio').value.trim(),
+      role: 'freelancer'
+    });
+
+    btn.textContent = 'שמור פרופיל'; btn.disabled = false;
+    if (!error) {
+      document.getElementById('save-msg').style.display = 'block';
+      setTimeout(() => document.getElementById('save-msg').style.display = 'none', 3000);
+    }
+  }
+
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  init();
+</script>
+</body>
+</html>
