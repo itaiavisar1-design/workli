@@ -83,8 +83,9 @@
 <nav>
   <a href="index.html" class="nav-logo">Work<span>li</span></a>
   <div class="nav-links">
-    <a href="signup.html" class="nav-link">פרסם פרופיל</a>
     <a href="browse.html" class="nav-link">חפש פרילנסרים</a>
+    <a href="auth.html" class="nav-link" id="nav-auth-link">כניסה</a>
+    <a href="auth.html" class="btn-primary" style="padding:9px 20px; font-size:0.88rem;">הרשמה</a>
   </div>
 </nav>
 
@@ -257,5 +258,19 @@
 
 <footer>Workli · נבנה בישראל 🇮🇱 · <a href="signup.html" style="color:var(--muted); text-decoration:none;">פרסם פרופיל</a> · <a href="browse.html" style="color:var(--muted); text-decoration:none;">חפש פרילנסרים</a></footer>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  // Update nav based on auth state
+  supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      const authLink = document.getElementById('nav-auth-link');
+      const regBtn = document.querySelector('a[href="auth.html"].btn-primary');
+      if (authLink) { authLink.textContent = 'הדשבורד שלי'; authLink.href = 'dashboard-freelancer.html'; }
+      if (regBtn) regBtn.style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
