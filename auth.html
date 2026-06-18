@@ -156,22 +156,19 @@
       return;
     }
 
-    // שמור פרופיל
+    // שמור פרופיל ברקע + הפנה מיד
     if (data.user) {
-      await supabaseClient.from('profiles').upsert({
+      supabaseClient.from('profiles').upsert({
         id: data.user.id, full_name: name,
         role: selectedRole, email
-      });
-      // הפנה לדף החשבון
-      showMsg('reg-success', 'החשבון נוצר! מעביר אותך...', 'success');
-      setTimeout(() => {
-        window.location.href = 'account.html';
-      }, 1000);
+      }); // לא מחכים — מפנים מיד
+      showMsg('reg-success', 'החשבון נוצר בהצלחה! מעביר אותך...', 'success');
+      setTimeout(() => { window.location.href = 'account.html'; }, 800);
     } else {
-      // אם email confirmation עדיין פעיל
-      showMsg('reg-success', 'נשלח אימייל אימות — בדוק את תיבת הדואר שלך.', 'success');
+      // email confirmation עדיין פעיל
+      showMsg('reg-success', 'בדוק את האימייל שלך ואשר את החשבון.', 'success');
+      btn.disabled = false; btn.textContent = 'צור חשבון';
     }
-    btn.disabled = false; btn.textContent = 'צור חשבון';
   }
 
   async function loginEmail() {

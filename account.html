@@ -30,7 +30,17 @@
       font-family: 'Space Grotesk', sans-serif;
       border: 3px solid rgba(255,255,255,0.15);
       position: relative; z-index: 1;
+      cursor: pointer; overflow: hidden;
     }
+    .avatar-big img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .avatar-big:hover::after {
+      content: '📷';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.4rem; border-radius: 50%;
+    }
+    #avatar-input { display: none; }
     .hero-info { position: relative; z-index: 1; }
     .hero-info h2 { font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
     .hero-info .hero-email { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 10px; }
@@ -132,7 +142,8 @@
 
   <!-- HERO -->
   <div class="hero-card">
-    <div class="avatar-big" id="avatar-big">?</div>
+    <div class="avatar-big" id="avatar-big" onclick="document.getElementById('avatar-input').click()" title="לחץ לשינוי תמונה">?</div>
+    <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(event)" />
     <div class="hero-info">
       <h2 id="hero-name">טוען...</h2>
       <div class="hero-email" id="hero-email"></div>
@@ -219,8 +230,13 @@
     const role = profile?.role || currentUser.user_metadata?.role || 'client';
     const initial = name.charAt(0).toUpperCase();
 
-    // Update hero
-    document.getElementById('avatar-big').textContent = initial;
+    // Load avatar if exists
+    if (profile?.avatar_url) {
+      const avatarEl = document.getElementById('avatar-big');
+      avatarEl.innerHTML = `<img src="${profile.avatar_url}" alt="avatar" />`;
+    } else {
+      document.getElementById('avatar-big').textContent = initial;
+    }
     document.getElementById('nav-initial').textContent = initial;
     document.getElementById('hero-name').textContent = name;
     document.getElementById('hero-email').textContent = email;
@@ -290,6 +306,45 @@
   async function logout() {
     await supabaseClient.auth.signOut();
     window.location.href = 'index.html';
+  }
+
+  async function uploadAvatar(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert('התמונה גדולה מדי — מקסימום 2MB');
+      return;
+    }
+
+    const avatarEl = document.getElementById('avatar-big');
+    avatarEl.innerHTML = '<span style="font-size:0.7rem; opacity:0.7;">טוען...</span>';
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${currentUser.id}.${fileExt}`;
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabaseClient.storage
+      .from('avatars')
+      .upload(fileName, file, { upsert: true });
+
+    if (uploadError) {
+      // Fallback: show as base64 locally
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        avatarEl.innerHTML = `<img src="${e.target.result}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+        document.getElementById('nav-avatar-sm').innerHTML = `<img src="${e.target.result}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" />`;
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const { data } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
+    const avatarUrl = data.publicUrl + '?t=' + Date.now();
+
+    await supabaseClient.from('profiles').update({ avatar_url: avatarUrl }).eq('id', currentUser.id);
+
+    avatarEl.innerHTML = `<img src="${avatarUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    document.getElementById('nav-initial').innerHTML = `<img src="${avatarUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" />`;
   }
 
   init();
