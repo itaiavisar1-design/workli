@@ -9,99 +9,49 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; background:#F0F2FF; }
-
-    .auth-card {
-      background:#fff; border:1.5px solid var(--border); border-radius:20px;
-      padding:40px 36px; width:100%; max-width:420px;
-    }
-
+    .auth-card { background:#fff; border:1.5px solid var(--border); border-radius:20px; padding:40px 36px; width:100%; max-width:420px; }
     .auth-logo { text-align:center; margin-bottom:28px; }
     .auth-logo a { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.8rem; color:var(--black); text-decoration:none; }
     .auth-logo a span { color:var(--accent); }
-
-    .auth-tabs { display:flex; gap:0; margin-bottom:28px; border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
-    .auth-tab {
-      flex:1; padding:11px; text-align:center; font-size:0.92rem; font-weight:700;
-      cursor:pointer; border:none; background:transparent; font-family:'Heebo',sans-serif;
-      color:var(--muted); transition:all 0.2s;
-    }
+    .auth-tabs { display:flex; margin-bottom:28px; border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
+    .auth-tab { flex:1; padding:11px; text-align:center; font-size:0.92rem; font-weight:700; cursor:pointer; border:none; background:transparent; font-family:'Heebo',sans-serif; color:var(--muted); transition:all 0.2s; }
     .auth-tab.active { background:var(--accent); color:#fff; }
-
     .auth-form { display:flex; flex-direction:column; gap:14px; }
-
-    .auth-form input, .auth-form select {
-      width:100%; padding:13px 16px; border:1.5px solid var(--border); border-radius:10px;
-      font-family:'Heebo',sans-serif; font-size:0.95rem; outline:none;
-      transition:border-color 0.2s, box-shadow 0.2s; background:var(--white);
-    }
-    .auth-form input:focus, .auth-form select:focus {
-      border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,0.1);
-    }
-
+    .auth-form input { width:100%; padding:13px 16px; border:1.5px solid var(--border); border-radius:10px; font-family:'Heebo',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.2s; background:#fff; }
+    .auth-form input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,0.1); }
     .role-select { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .role-btn {
-      padding:14px 10px; border:1.5px solid var(--border); border-radius:10px;
-      text-align:center; cursor:pointer; transition:all 0.2s; background:#fff;
-      font-family:'Heebo',sans-serif;
-    }
-    .role-btn:hover { border-color:var(--accent); }
+    .role-btn { padding:14px 10px; border:1.5px solid var(--border); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s; background:#fff; font-family:'Heebo',sans-serif; }
     .role-btn.active { border-color:var(--accent); background:rgba(79,110,247,0.06); }
-    .role-btn .role-icon { font-size:1.6rem; margin-bottom:6px; }
-    .role-btn .role-name { font-size:0.88rem; font-weight:700; color:var(--black); }
-    .role-btn .role-desc { font-size:0.75rem; color:var(--muted); margin-top:2px; }
-
+    .role-icon { font-size:1.6rem; margin-bottom:6px; }
+    .role-name { font-size:0.88rem; font-weight:700; }
+    .role-desc { font-size:0.75rem; color:var(--muted); margin-top:2px; }
     .divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:0.82rem; }
     .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
-
-    .btn-google {
-      width:100%; padding:13px; border:1.5px solid var(--border); border-radius:10px;
-      background:#fff; font-family:'Heebo',sans-serif; font-size:0.95rem; font-weight:600;
-      cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
-      transition:border-color 0.2s, box-shadow 0.2s; color:var(--black);
-    }
-    .btn-google:hover { border-color:#4285F4; box-shadow:0 2px 8px rgba(66,133,244,0.15); }
+    .btn-google { width:100%; padding:13px; border:1.5px solid var(--border); border-radius:10px; background:#fff; font-family:'Heebo',sans-serif; font-size:0.95rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.2s; color:var(--black); }
+    .btn-google:hover { border-color:#4285F4; }
     .btn-google img { width:18px; height:18px; }
-
-    .btn-submit {
-      width:100%; padding:14px; background:var(--accent); color:#fff; border:none;
-      border-radius:10px; font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700;
-      cursor:pointer; transition:background 0.2s, transform 0.15s;
-    }
-    .btn-submit:hover { background:#3a57e0; transform:translateY(-1px); }
-    .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-
-    .auth-error {
-      background:rgba(224,88,76,0.08); border:1px solid rgba(224,88,76,0.25);
-      color:var(--error); border-radius:10px; padding:12px 16px;
-      font-size:0.88rem; font-weight:600; display:none; text-align:center;
-    }
-    .auth-error.show { display:block; }
-
-    .auth-success {
-      background:rgba(46,173,99,0.08); border:1px solid rgba(46,173,99,0.25);
-      color:var(--success); border-radius:10px; padding:12px 16px;
-      font-size:0.88rem; font-weight:600; display:none; text-align:center;
-    }
-    .auth-success.show { display:block; }
-
-    .label { font-size:0.85rem; font-weight:700; color:var(--black); margin-bottom:2px; }
-
+    .btn-submit { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .btn-submit:hover { background:#3a57e0; }
+    .btn-submit:disabled { opacity:0.6; cursor:not-allowed; }
+    .msg { border-radius:10px; padding:12px 16px; font-size:0.88rem; font-weight:600; display:none; text-align:center; }
+    .msg.error { background:rgba(224,88,76,0.08); border:1px solid rgba(224,88,76,0.25); color:#E0584C; }
+    .msg.success { background:rgba(46,173,99,0.08); border:1px solid rgba(46,173,99,0.25); color:#2EAD63; }
+    .msg.show { display:block; }
+    .label { font-size:0.85rem; font-weight:700; margin-bottom:4px; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-left:8px; }
   </style>
 </head>
 <body>
-
 <div class="auth-card">
   <div class="auth-logo"><a href="index.html">Work<span>li</span></a></div>
 
-  <!-- TABS -->
   <div class="auth-tabs">
-    <button class="auth-tab active" id="tab-register" onclick="switchTab('register')">הרשמה</button>
-    <button class="auth-tab" id="tab-login" onclick="switchTab('login')">כניסה</button>
+    <button class="auth-tab active" onclick="switchTab('register')">הרשמה</button>
+    <button class="auth-tab" onclick="switchTab('login')">כניסה</button>
   </div>
 
-  <!-- REGISTER FORM -->
+  <!-- REGISTER -->
   <div id="form-register" class="auth-form">
     <div>
       <div class="label" style="margin-bottom:8px;">אני...</div>
@@ -109,7 +59,7 @@
         <div class="role-btn active" id="role-freelancer" onclick="selectRole('freelancer')">
           <div class="role-icon">👤</div>
           <div class="role-name">פרילנסר</div>
-          <div class="role-desc">רוצה להרוויח כסף</div>
+          <div class="role-desc">רוצה להרוויח</div>
         </div>
         <div class="role-btn" id="role-client" onclick="selectRole('client')">
           <div class="role-icon">🏢</div>
@@ -118,40 +68,30 @@
         </div>
       </div>
     </div>
-
     <input type="text" id="reg-name" placeholder="שם מלא" />
     <input type="email" id="reg-email" placeholder="אימייל" />
     <input type="password" id="reg-password" placeholder="סיסמה (לפחות 6 תווים)" />
-
-    <div class="auth-error" id="reg-error"></div>
-    <div class="auth-success" id="reg-success"></div>
-
+    <div class="msg error" id="reg-error"></div>
+    <div class="msg success" id="reg-success"></div>
     <button class="btn-submit" id="reg-btn" onclick="register()">צור חשבון</button>
-
     <div class="divider">או</div>
-
     <button class="btn-google" onclick="loginGoogle()">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
       המשך עם Google
     </button>
   </div>
 
-  <!-- LOGIN FORM -->
+  <!-- LOGIN -->
   <div id="form-login" class="auth-form" style="display:none;">
     <input type="email" id="login-email" placeholder="אימייל" />
     <input type="password" id="login-password" placeholder="סיסמה" />
-
-    <div class="auth-error" id="login-error"></div>
-
+    <div class="msg error" id="login-error"></div>
     <button class="btn-submit" id="login-btn" onclick="loginEmail()">כניסה</button>
-
     <div class="divider">או</div>
-
     <button class="btn-google" onclick="loginGoogle()">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
       המשך עם Google
     </button>
-
     <div style="text-align:center; font-size:0.85rem; color:var(--muted);">
       שכחת סיסמה? <a href="#" onclick="resetPassword()" style="color:var(--accent); font-weight:600;">לחץ כאן</a>
     </div>
@@ -162,21 +102,28 @@
 <script>
   let selectedRole = 'freelancer';
 
-  // Check if already logged in
+  // אם כבר מחובר — הפנה לדשבורד
   supabaseClient.auth.getSession().then(({ data: { session } }) => {
-    if (session) redirectAfterLogin(session.user);
+    if (session) goToDashboard(session.user);
   });
 
-  // Listen for auth changes (e.g. Google OAuth redirect)
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      redirectAfterLogin(session.user);
-    }
+    if (event === 'SIGNED_IN' && session) goToDashboard(session.user);
   });
+
+  async function goToDashboard(user) {
+    try {
+      const { data: profile } = await supabaseClient
+        .from('profiles').select('role').eq('id', user.id).maybeSingle();
+      const role = profile?.role || user.user_metadata?.role || 'client';
+      window.location.href = role === 'freelancer' ? 'dashboard-freelancer.html' : 'dashboard-client.html';
+    } catch(e) {
+      window.location.href = 'dashboard-client.html';
+    }
+  }
 
   function switchTab(tab) {
-    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0) === (tab==='register')));
     document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
     document.getElementById('form-login').style.display = tab === 'login' ? 'flex' : 'none';
   }
@@ -187,23 +134,18 @@
     document.getElementById('role-client').classList.toggle('active', role === 'client');
   }
 
-  function showError(id, msg) {
+  function showMsg(id, msg, type) {
     const el = document.getElementById(id);
-    el.textContent = msg; el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 5000);
-  }
-  function showSuccess(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg; el.classList.add('show');
+    el.textContent = msg; el.className = 'msg ' + type + ' show';
+    if (type === 'error') setTimeout(() => el.classList.remove('show'), 5000);
   }
 
   async function register() {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
-
-    if (!name || !email || !password) return showError('reg-error', 'נא למלא את כל השדות.');
-    if (password.length < 6) return showError('reg-error', 'הסיסמה חייבת להיות לפחות 6 תווים.');
+    if (!name || !email || !password) return showMsg('reg-error', 'נא למלא את כל השדות.', 'error');
+    if (password.length < 6) return showMsg('reg-error', 'הסיסמה חייבת להיות לפחות 6 תווים.', 'error');
 
     const btn = document.getElementById('reg-btn');
     btn.disabled = true;
@@ -215,13 +157,13 @@
     });
 
     if (error) {
-      showError('reg-error', error.message === 'User already registered' ? 'כתובת האימייל הזו כבר רשומה.' : 'שגיאה ביצירת החשבון. נסה שוב.');
-      btn.disabled = false;
-      btn.textContent = 'צור חשבון';
+      const msg = error.message.includes('already') ? 'האימייל הזה כבר רשום — נסה להתחבר.' : 'שגיאה ביצירת החשבון: ' + error.message;
+      showMsg('reg-error', msg, 'error');
+      btn.disabled = false; btn.textContent = 'צור חשבון';
       return;
     }
 
-    // Save profile to DB
+    // שמור פרופיל
     if (data.user) {
       await supabaseClient.from('profiles').upsert({
         id: data.user.id, full_name: name,
@@ -229,53 +171,41 @@
       });
     }
 
-    showSuccess('reg-success', 'נשלח אימייל אימות! בדוק את תיבת הדואר שלך ולחץ על הקישור.');
-    btn.disabled = false;
-    btn.textContent = 'צור חשבון';
+    showMsg('reg-success', 'החשבון נוצר! מעביר אותך לדשבורד...', 'success');
+    btn.disabled = false; btn.textContent = 'צור חשבון';
   }
 
   async function loginEmail() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
-
-    if (!email || !password) return showError('login-error', 'נא למלא אימייל וסיסמה.');
+    if (!email || !password) return showMsg('login-error', 'נא למלא אימייל וסיסמה.', 'error');
 
     const btn = document.getElementById('login-btn');
     btn.disabled = true;
     btn.innerHTML = 'נכנס...<span class="spinner"></span>';
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
     if (error) {
-      showError('login-error', 'אימייל או סיסמה שגויים.');
-      btn.disabled = false;
-      btn.textContent = 'כניסה';
+      showMsg('login-error', 'אימייל או סיסמה שגויים.', 'error');
+      btn.disabled = false; btn.textContent = 'כניסה';
       return;
     }
-
-    redirectAfterLogin(data.user);
+    goToDashboard(data.user);
   }
 
   async function loginGoogle() {
-    await supabaseClient.auth.signInWithOAuth({
+    const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/dashboard.html' }
+      options: { redirectTo: window.location.origin + '/auth.html' }
     });
+    if (error) showMsg('reg-error', 'שגיאה בחיבור ל-Google. נסה אימייל וסיסמה.', 'error');
   }
 
   async function resetPassword() {
     const email = document.getElementById('login-email').value.trim();
-    if (!email) return showError('login-error', 'הכנס אימייל ואז לחץ על שכחת סיסמה.');
+    if (!email) return showMsg('login-error', 'הכנס אימייל קודם.', 'error');
     await supabaseClient.auth.resetPasswordForEmail(email);
-    showError('login-error', 'נשלח קישור לאיפוס סיסמה לאימייל שלך.');
-  }
-
-  async function redirectAfterLogin(user) {
-    // Check role and redirect
-    const { data: profile } = await supabaseClient
-      .from('profiles').select('role').eq('id', user.id).single();
-    const role = profile?.role || user.user_metadata?.role || 'client';
-    window.location.href = role === 'freelancer' ? 'dashboard-freelancer.html' : 'dashboard-client.html';
+    showMsg('login-error', 'נשלח קישור לאיפוס סיסמה לאימייל שלך.', 'error');
   }
 </script>
 </body>
