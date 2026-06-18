@@ -112,14 +112,7 @@
   });
 
   async function goToDashboard(user) {
-    try {
-      const { data: profile } = await supabaseClient
-        .from('profiles').select('role').eq('id', user.id).maybeSingle();
-      const role = profile?.role || user.user_metadata?.role || 'client';
-      window.location.href = role === 'freelancer' ? 'dashboard-freelancer.html' : 'dashboard-client.html';
-    } catch(e) {
-      window.location.href = 'dashboard-client.html';
-    }
+    window.location.href = 'account.html';
   }
 
   function switchTab(tab) {
@@ -169,10 +162,10 @@
         id: data.user.id, full_name: name,
         role: selectedRole, email
       });
-      // הפנה לדשבורד ישירות
-      showMsg('reg-success', 'החשבון נוצר! מעביר אותך לדשבורד...', 'success');
+      // הפנה לדף החשבון
+      showMsg('reg-success', 'החשבון נוצר! מעביר אותך...', 'success');
       setTimeout(() => {
-        window.location.href = selectedRole === 'freelancer' ? 'dashboard-freelancer.html' : 'dashboard-client.html';
+        window.location.href = 'account.html';
       }, 1000);
     } else {
       // אם email confirmation עדיין פעיל

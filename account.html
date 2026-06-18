@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>החשבון שלי — Workli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .account-wrap { max-width: 680px; margin: 0 auto; padding: 40px 5% 80px; }
+
+    /* ── HERO CARD ── */
+    .hero-card {
+      background: var(--black); border-radius: 20px;
+      padding: 36px 32px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 24px;
+      position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: ''; position: absolute; top: -60px; left: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(79,110,247,0.3) 0%, transparent 70%);
+    }
+    .avatar-big {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; font-weight: 700; flex-shrink: 0;
+      font-family: 'Space Grotesk', sans-serif;
+      border: 3px solid rgba(255,255,255,0.15);
+      position: relative; z-index: 1;
+    }
+    .hero-info { position: relative; z-index: 1; }
+    .hero-info h2 { font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .hero-info .hero-email { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 10px; }
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(79,110,247,0.25); color: var(--accent2);
+      border: 1px solid rgba(79,110,247,0.3); border-radius: 100px;
+      padding: 4px 14px; font-size: 0.78rem; font-weight: 700;
+    }
+
+    /* ── SECTIONS ── */
+    .section-card {
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: 16px; padding: 28px; margin-bottom: 16px;
+    }
+    .section-card h3 {
+      font-size: 1rem; font-weight: 800; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+    .form-field input, .form-field textarea, .form-field select {
+      padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+      background: var(--white); color: var(--black);
+    }
+    .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.08);
+    }
+    .form-field textarea { min-height: 80px; resize: vertical; }
+
+    .save-row { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+    .save-btn {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 10px; padding: 12px 28px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      font-family: 'Heebo', sans-serif; transition: background 0.2s;
+    }
+    .save-btn:hover { background: #3a57e0; }
+    .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .save-msg { font-size: 0.85rem; color: var(--success); display: none; font-weight: 600; }
+    .save-msg.show { display: block; }
+
+    /* ── FREELANCER PROFILE CARD ── */
+    .publish-card {
+      background: linear-gradient(135deg, var(--accent) 0%, #7C3AED 100%);
+      border-radius: 16px; padding: 28px; margin-bottom: 16px;
+      color: #fff;
+    }
+    .publish-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 6px; color: #fff; }
+    .publish-card p { font-size: 0.88rem; color: rgba(255,255,255,0.75); margin-bottom: 20px; }
+    .publish-card a {
+      background: #fff; color: var(--accent);
+      border-radius: 10px; padding: 11px 24px;
+      font-size: 0.9rem; font-weight: 700; text-decoration: none;
+      display: inline-block; transition: transform 0.15s;
+    }
+    .publish-card a:hover { transform: translateY(-1px); }
+
+    /* ── DANGER ZONE ── */
+    .danger-btn {
+      background: transparent; color: var(--error);
+      border: 1.5px solid rgba(224,88,76,0.3); border-radius: 10px;
+      padding: 10px 20px; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; font-family: 'Heebo', sans-serif;
+      transition: all 0.2s;
+    }
+    .danger-btn:hover { background: var(--error); color: #fff; border-color: var(--error); }
+
+    /* ── NAV USER ── */
+    .nav-user { display: flex; align-items: center; gap: 10px; }
+    .nav-avatar-sm {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.82rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-left: 8px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Work<span>li</span></a>
+  <div class="nav-user">
+    <div class="nav-avatar-sm" id="nav-initial">?</div>
+    <a href="browse.html" class="nav-link">חיפוש</a>
+    <button onclick="logout()" class="nav-link" style="background:none; border:none; cursor:pointer; font-family:'Heebo',sans-serif; font-size:0.9rem; font-weight:600; color:var(--muted);">יציאה</button>
+  </div>
+</nav>
+
+<div class="account-wrap">
+
+  <!-- HERO -->
+  <div class="hero-card">
+    <div class="avatar-big" id="avatar-big">?</div>
+    <div class="hero-info">
+      <h2 id="hero-name">טוען...</h2>
+      <div class="hero-email" id="hero-email"></div>
+      <div class="role-badge" id="hero-role">👤 פרילנסר</div>
+    </div>
+  </div>
+
+  <!-- FREELANCER CTA — מוצג רק לפרילנסרים -->
+  <div class="publish-card" id="publish-cta" style="display:none;">
+    <h3>🚀 טרם פרסמת פרופיל</h3>
+    <p>לקוחות לא יכולים למצוא אותך עדיין — פרסם את השירותים שלך ותתחיל לקבל פניות.</p>
+    <a href="signup.html">פרסם פרופיל עכשיו</a>
+  </div>
+
+  <!-- PERSONAL INFO -->
+  <div class="section-card">
+    <h3>👤 פרטים אישיים</h3>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>שם מלא</label>
+        <input type="text" id="p-name" placeholder="השם שלך" />
+      </div>
+      <div class="form-field">
+        <label>טלפון / ווטסאפ</label>
+        <input type="tel" id="p-phone" placeholder="05X-XXXXXXX" />
+      </div>
+      <div class="form-field full">
+        <label>ספר על עצמך</label>
+        <textarea id="p-bio" placeholder="מי אתה, מה אתה עושה, מה הניסיון שלך..."></textarea>
+      </div>
+    </div>
+    <div class="save-row">
+      <button class="save-btn" id="save-btn" onclick="saveProfile()">שמור שינויים</button>
+      <span class="save-msg" id="save-msg">✓ נשמר בהצלחה!</span>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="section-card">
+    <h3>🔒 שינוי סיסמה</h3>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>סיסמה חדשה</label>
+        <input type="password" id="new-password" placeholder="לפחות 6 תווים" />
+      </div>
+      <div class="form-field">
+        <label>אימות סיסמה</label>
+        <input type="password" id="confirm-password" placeholder="אותה סיסמה שוב" />
+      </div>
+    </div>
+    <div class="save-row" style="margin-top:14px;">
+      <button class="save-btn" onclick="changePassword()">עדכן סיסמה</button>
+      <span class="save-msg" id="pass-msg">✓ הסיסמה עודכנה!</span>
+    </div>
+    <div style="font-size:0.82rem; color:var(--error); margin-top:8px; display:none;" id="pass-error"></div>
+  </div>
+
+  <!-- LOGOUT / DANGER -->
+  <div class="section-card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="font-weight:700; font-size:0.95rem;">יציאה מהחשבון</div>
+      <div style="font-size:0.82rem; color:var(--muted);">תצטרך להתחבר שוב בכניסה הבאה</div>
+    </div>
+    <button class="danger-btn" onclick="logout()">התנתק</button>
+  </div>
+
+</div>
+
+<script src="config.js"></script>
+<script>
+  let currentUser = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
+    currentUser = session.user;
+
+    // Load profile
+    const { data: profile } = await supabaseClient
+      .from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+
+    const name = profile?.full_name || currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    const email = currentUser.email;
+    const role = profile?.role || currentUser.user_metadata?.role || 'client';
+    const initial = name.charAt(0).toUpperCase();
+
+    // Update hero
+    document.getElementById('avatar-big').textContent = initial;
+    document.getElementById('nav-initial').textContent = initial;
+    document.getElementById('hero-name').textContent = name;
+    document.getElementById('hero-email').textContent = email;
+    document.getElementById('hero-role').textContent = role === 'freelancer' ? '👤 פרילנסר' : '🏢 לקוח';
+
+    // Fill form
+    document.getElementById('p-name').value = profile?.full_name || name;
+    document.getElementById('p-phone').value = profile?.phone || '';
+    document.getElementById('p-bio').value = profile?.bio || '';
+
+    // Show publish CTA for freelancers
+    if (role === 'freelancer') {
+      document.getElementById('publish-cta').style.display = 'block';
+    }
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.innerHTML = 'שומר...<span class="spinner"></span>';
+
+    const name = document.getElementById('p-name').value.trim();
+    const phone = document.getElementById('p-phone').value.trim();
+    const bio = document.getElementById('p-bio').value.trim();
+
+    const { error } = await supabaseClient.from('profiles').upsert({
+      id: currentUser.id,
+      full_name: name,
+      phone, bio,
+      email: currentUser.email,
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'שמור שינויים';
+
+    if (!error) {
+      document.getElementById('hero-name').textContent = name;
+      document.getElementById('avatar-big').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('nav-initial').textContent = name.charAt(0).toUpperCase();
+      const msg = document.getElementById('save-msg');
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), 3000);
+    }
+  }
+
+  async function changePassword() {
+    const newPw = document.getElementById('new-password').value;
+    const confirmPw = document.getElementById('confirm-password').value;
+    const errEl = document.getElementById('pass-error');
+    errEl.style.display = 'none';
+
+    if (newPw.length < 6) { errEl.textContent = 'הסיסמה חייבת להיות לפחות 6 תווים.'; errEl.style.display = 'block'; return; }
+    if (newPw !== confirmPw) { errEl.textContent = 'הסיסמאות לא תואמות.'; errEl.style.display = 'block'; return; }
+
+    const { error } = await supabaseClient.auth.updateUser({ password: newPw });
+    if (!error) {
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+      const msg = document.getElementById('pass-msg');
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), 3000);
+    } else {
+      errEl.textContent = 'שגיאה בעדכון הסיסמה.'; errEl.style.display = 'block';
+    }
+  }
+
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  init();
+</script>
+</body>
+</html>
