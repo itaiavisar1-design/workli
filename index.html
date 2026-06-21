@@ -8,6 +8,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
+    /* ── HERO ── */
+    .hero {
+      min-height: 78vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 90px 5% 70px;
+      max-width: 900px; margin: 0 auto;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 700px; z-index: -1;
+      background: radial-gradient(circle, rgba(20,184,166,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(20,184,166,0.08); color: var(--accent);
+      border: 1px solid rgba(20,184,166,0.25); border-radius: 100px;
+      padding: 7px 18px; font-size: 0.82rem; font-weight: 600;
+      margin-bottom: 26px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5.2vw, 3.4rem);
+      font-weight: 900; line-height: 1.25; letter-spacing: -1.2px;
+      margin-bottom: 22px; max-width: 760px;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
+      font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: var(--muted);
+      max-width: 540px; margin: 0 auto 36px; line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 600px) {
+      .hero { padding: 70px 6% 50px; }
+      .hero-actions { flex-direction: column; width: 100%; max-width: 320px; }
+      .hero-actions a { width: 100%; text-align: center; }
+    }
+
     /* ── LIVE INDICATOR ── */
     .live-indicator {
       display: inline-flex; align-items: center; gap: 8px;
