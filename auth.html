@@ -102,6 +102,10 @@
 <script>
   let selectedRole = 'freelancer';
 
+  // אם הגיע עם ?role=freelancer מתוך redirect — וודא בחירה נכונה (ברירת מחדל כבר freelancer)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('role') === 'client') selectRole('client');
+
   // אם כבר מחובר — הפנה לדשבורד
   supabaseClient.auth.getSession().then(({ data: { session } }) => {
     if (session) goToDashboard(session.user);

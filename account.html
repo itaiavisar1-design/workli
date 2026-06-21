@@ -151,11 +151,53 @@
     </div>
   </div>
 
-  <!-- FREELANCER CTA — מוצג רק לפרילנסרים -->
-  <div class="publish-card" id="publish-cta" style="display:none;">
-    <h3>🚀 טרם פרסמת פרופיל</h3>
-    <p>לקוחות לא יכולים למצוא אותך עדיין — פרסם את השירותים שלך ותתחיל לקבל פניות.</p>
-    <a href="signup.html">פרסם פרופיל עכשיו</a>
+  <!-- FREELANCER PUBLIC PROFILE — מוצג רק לפרילנסרים -->
+  <div class="section-card" id="freelancer-section" style="display:none; border-color: var(--accent); border-width: 2px;">
+    <h3>
+      🚀 הפרופיל הציבורי שלך
+      <span id="freelancer-status-badge" style="font-size:0.75rem; font-weight:700; padding:3px 10px; border-radius:100px; margin-right:8px;"></span>
+    </h3>
+    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:18px;" id="freelancer-status-text"></p>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>תחום עבודה</label>
+        <select id="f-category">
+          <option value="" disabled selected>בחר תחום</option>
+          <option value="עיצוב גרפי">עיצוב גרפי</option>
+          <option value="פיתוח אתרים">פיתוח אתרים</option>
+          <option value="סושיאל מדיה">סושיאל מדיה</option>
+          <option value="עריכת וידאו">עריכת וידאו</option>
+          <option value="כתיבה ותוכן">כתיבה ותוכן</option>
+          <option value="צילום">צילום</option>
+          <option value="שיווק דיגיטלי">שיווק דיגיטלי</option>
+          <option value="AI Automation">AI Automation</option>
+          <option value="מוזיקה ופודקאסט">מוזיקה ופודקאסט</option>
+          <option value="שיעורים פרטיים">שיעורים פרטיים</option>
+          <option value="אחר">אחר</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>מחיר</label>
+        <input type="number" id="f-price" placeholder="150" min="0" />
+      </div>
+      <div class="form-field">
+        <label>יחידת מחיר</label>
+        <select id="f-price-unit">
+          <option value="לפרויקט">לפרויקט</option>
+          <option value="לשעה">לשעה</option>
+          <option value="לפוסט">לפוסט</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>תיאור השירות <span style="font-weight:400; color:var(--muted);">— מה אתה מציע ולמי</span></label>
+        <textarea id="f-description" placeholder="לדוגמה: מעצב לוגואים ופוסטים לעסקים קטנים"></textarea>
+      </div>
+    </div>
+    <div class="save-row">
+      <button class="save-btn" id="freelancer-save-btn" onclick="saveFreelancerListing()">פרסם / עדכן פרופיל ציבורי</button>
+      <span class="save-msg" id="freelancer-save-msg">✓ נשמר ופורסם!</span>
+    </div>
+    <div style="font-size:0.82rem; color:var(--error); margin-top:8px; display:none;" id="freelancer-error"></div>
   </div>
 
   <!-- PERSONAL INFO -->
@@ -266,9 +308,36 @@
     document.getElementById('p-phone').value = profile?.phone || '';
     document.getElementById('p-bio').value = profile?.bio || '';
 
-    // Show publish CTA for freelancers
+    // Show freelancer public-profile section for freelancers, and load existing listing if any
     if (role === 'freelancer') {
-      document.getElementById('publish-cta').style.display = 'block';
+      const section = document.getElementById('freelancer-section');
+      section.style.display = 'block';
+
+      const { data: listing } = await supabaseClient
+        .from('freelancers').select('*').eq('user_id', currentUser.id).maybeSingle();
+
+      const badge = document.getElementById('freelancer-status-badge');
+      const statusText = document.getElementById('freelancer-status-text');
+
+      if (listing) {
+        document.getElementById('f-category').value = listing.category || '';
+        document.getElementById('f-price').value = listing.price || '';
+        document.getElementById('f-price-unit').value = listing.price_unit || 'לפרויקט';
+        document.getElementById('f-description').value = listing.description || '';
+
+        if (listing.blocked) {
+          badge.textContent = '🚫 חסום'; badge.style.background = 'rgba(224,88,76,0.1)'; badge.style.color = 'var(--error)';
+          statusText.textContent = 'הפרופיל שלך נחסם על ידי הצוות. צור קשר לפרטים.';
+        } else {
+          badge.textContent = '✓ מפורסם ופעיל'; badge.style.background = 'rgba(20,184,166,0.1)'; badge.style.color = 'var(--accent)';
+          statusText.textContent = 'לקוחות יכולים למצוא ולפנות אליך כרגע.';
+        }
+        document.getElementById('freelancer-save-btn').textContent = 'עדכן פרופיל ציבורי';
+      } else {
+        badge.textContent = '○ טרם פורסם'; badge.style.background = 'rgba(100,116,139,0.1)'; badge.style.color = 'var(--muted)';
+        statusText.textContent = 'מלא את הפרטים ולחץ פרסם — לקוחות יראו אותך מיד.';
+        document.getElementById('freelancer-save-btn').textContent = 'פרסם פרופיל ציבורי';
+      }
     }
   }
 
@@ -299,6 +368,59 @@
       msg.classList.add('show');
       setTimeout(() => msg.classList.remove('show'), 3000);
     }
+  }
+
+  async function saveFreelancerListing() {
+    const errEl = document.getElementById('freelancer-error');
+    errEl.style.display = 'none';
+
+    const name = document.getElementById('p-name').value.trim();
+    const phone = document.getElementById('p-phone').value.trim().replace(/[^0-9]/g, '');
+    const category = document.getElementById('f-category').value;
+    const price = document.getElementById('f-price').value;
+    const priceUnit = document.getElementById('f-price-unit').value;
+    const description = document.getElementById('f-description').value.trim();
+
+    if (!name || !phone || !category || !price || !description) {
+      errEl.textContent = 'נא למלא שם וטלפון (למעלה) + תחום, מחיר ותיאור.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (phone.length < 9 || phone.length > 10) {
+      errEl.textContent = 'מספר הווטסאפ לא תקין — עדכן בשדה "טלפון / ווטסאפ" למעלה.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('freelancer-save-btn');
+    btn.disabled = true;
+    btn.innerHTML = 'שומר...<span class="spinner"></span>';
+
+    const { error } = await supabaseClient.from('freelancers').upsert({
+      user_id: currentUser.id,
+      name, whatsapp: phone,
+      category, price: Number(price), price_unit: priceUnit,
+      description
+    }, { onConflict: 'user_id' });
+
+    btn.disabled = false;
+
+    if (error) {
+      errEl.textContent = 'שגיאה בשמירה — נסה שוב.';
+      errEl.style.display = 'block';
+      btn.textContent = 'פרסם / עדכן פרופיל ציבורי';
+      return;
+    }
+
+    btn.textContent = 'עדכן פרופיל ציבורי';
+    document.getElementById('freelancer-status-badge').textContent = '✓ מפורסם ופעיל';
+    document.getElementById('freelancer-status-badge').style.background = 'rgba(20,184,166,0.1)';
+    document.getElementById('freelancer-status-badge').style.color = 'var(--accent)';
+    document.getElementById('freelancer-status-text').textContent = 'לקוחות יכולים למצוא ולפנות אליך כרגע.';
+
+    const msg = document.getElementById('freelancer-save-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 3000);
   }
 
   async function changePassword() {
@@ -377,11 +499,8 @@
       return;
     }
 
-    // מחיקת פרופיל פרילנסר אם קיים (לפי מספר טלפון תואם)
-    const phone = document.getElementById('p-phone').value.trim().replace(/[^0-9]/g, '');
-    if (phone) {
-      await supabaseClient.from('freelancers').delete().eq('whatsapp', phone);
-    }
+    // מחיקת פרופיל פרילנסר ציבורי אם קיים (לפי הקישור האמיתי לחשבון)
+    await supabaseClient.from('freelancers').delete().eq('user_id', currentUser.id);
 
     // מחיקת רשומת הפרופיל האישי
     await supabaseClient.from('profiles').delete().eq('id', currentUser.id);

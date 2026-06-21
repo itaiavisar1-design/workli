@@ -381,7 +381,7 @@
       return `
         <div class="table-row ${status === 'blocked' ? 'blocked' : ''} ${status === 'flagged' ? 'flagged' : ''}">
           <div>
-            <div class="row-name ${isBad ? 'has-flag' : ''}">${escHtml(r.name)}</div>
+            <div class="row-name ${isBad ? 'has-flag' : ''}">${escHtml(r.name)} ${r.user_id ? '<span title="חשבון מאומת" style="font-size:0.75rem;">✅</span>' : '<span title="פרופיל ישן ללא חשבון מקושר" style="font-size:0.7rem; opacity:0.4;">⚪</span>'}</div>
             <div class="row-sub">📱 ${r.whatsapp}</div>
             <div class="row-sub" style="margin-top:4px; font-size:0.75rem;">${escHtml(r.description.slice(0, 60))}${r.description.length > 60 ? '...' : ''}</div>
           </div>
