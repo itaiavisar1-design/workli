@@ -156,17 +156,25 @@
       return;
     }
 
-    // שמור פרופיל ברקע + הפנה מיד
+    // שמור פרופיל + בדוק אם יש session פעיל
     if (data.user) {
-      supabaseClient.from('profiles').upsert({
+      await supabaseClient.from('profiles').upsert({
         id: data.user.id, full_name: name,
         role: selectedRole, email
-      }); // לא מחכים — מפנים מיד
-      showMsg('reg-success', 'החשבון נוצר בהצלחה! מעביר אותך...', 'success');
-      setTimeout(() => { window.location.href = 'account.html'; }, 800);
+      });
+
+      if (data.session) {
+        // יש session פעיל — אפשר להפנות מיד
+        showMsg('reg-success', 'החשבון נוצר בהצלחה! מעביר אותך...', 'success');
+        setTimeout(() => { window.location.href = 'account.html'; }, 800);
+      } else {
+        // אין session — כנראה אימות אימייל עדיין פעיל ב-Supabase
+        showMsg('reg-success', 'החשבון נוצר! נסה להתחבר עכשיו עם האימייל והסיסמה.', 'success');
+        btn.disabled = false; btn.textContent = 'צור חשבון';
+        setTimeout(() => switchTab('login'), 1500);
+      }
     } else {
-      // email confirmation עדיין פעיל
-      showMsg('reg-success', 'בדוק את האימייל שלך ואשר את החשבון.', 'success');
+      showMsg('reg-error', 'שגיאה לא צפויה. נסה שוב.', 'error');
       btn.disabled = false; btn.textContent = 'צור חשבון';
     }
   }

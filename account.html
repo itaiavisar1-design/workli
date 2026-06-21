@@ -210,6 +210,25 @@
     <button class="danger-btn" onclick="logout()">התנתק</button>
   </div>
 
+  <!-- DELETE ACCOUNT -->
+  <div class="section-card" style="border-color: rgba(224,88,76,0.3);">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-weight:700; font-size:0.95rem; color:var(--error);">מחיקת חשבון</div>
+        <div style="font-size:0.82rem; color:var(--muted);">פעולה זו תמחק את החשבון שלך לצמיתות ולא ניתנת לביטול</div>
+      </div>
+      <button class="danger-btn" onclick="confirmDeleteAccount()">מחק חשבון</button>
+    </div>
+    <div id="delete-confirm-box" style="display:none; margin-top:18px; padding-top:18px; border-top:1px solid var(--border);">
+      <p style="font-size:0.88rem; margin-bottom:12px;">להקלדה לאישור: כתוב <strong>מחק</strong> בתיבה למטה</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input type="text" id="delete-confirm-input" placeholder="כתוב מחק" style="flex:1; min-width:160px; padding:11px 14px; border:1.5px solid var(--error); border-radius:10px; font-family:'Heebo',sans-serif; outline:none;" />
+        <button class="danger-btn" style="background:var(--error); color:#fff;" onclick="deleteAccount()">אישור סופי — מחק</button>
+        <button class="danger-btn" style="border-color:var(--border); color:var(--muted);" onclick="document.getElementById('delete-confirm-box').style.display='none'">ביטול</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="config.js"></script>
@@ -345,6 +364,33 @@
 
     avatarEl.innerHTML = `<img src="${avatarUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
     document.getElementById('nav-initial').innerHTML = `<img src="${avatarUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" />`;
+  }
+
+  function confirmDeleteAccount() {
+    document.getElementById('delete-confirm-box').style.display = 'block';
+  }
+
+  async function deleteAccount() {
+    const confirmText = document.getElementById('delete-confirm-input').value.trim();
+    if (confirmText !== 'מחק') {
+      alert('כדי לאשר, כתוב בדיוק את המילה "מחק" בתיבה.');
+      return;
+    }
+
+    // מחיקת פרופיל פרילנסר אם קיים (לפי מספר טלפון תואם)
+    const phone = document.getElementById('p-phone').value.trim().replace(/[^0-9]/g, '');
+    if (phone) {
+      await supabaseClient.from('freelancers').delete().eq('whatsapp', phone);
+    }
+
+    // מחיקת רשומת הפרופיל האישי
+    await supabaseClient.from('profiles').delete().eq('id', currentUser.id);
+
+    // התנתקות
+    await supabaseClient.auth.signOut();
+
+    alert('החשבון והנתונים שלך נמחקו. אם תרצה להירשם שוב באותו אימייל, פנה אלינו תחילה.');
+    window.location.href = 'index.html';
   }
 
   init();
